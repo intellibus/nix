@@ -18,7 +18,7 @@ If you discover a security vulnerability, please follow these steps:
 Security vulnerabilities should not be disclosed publicly until they are resolved.
 
 ### 2️⃣ Report privately
-Please email security concerns to: **[your-email@example.com]**
+Please use GitHub's private vulnerability reporting feature:
 
 Or use GitHub's private vulnerability reporting:
 1. Go to the **Security** tab

@@ -118,4 +118,8 @@ sudo nixos-generate-config --root /mnt
 - [Options Search](https://search.nixos.org/options)
 - [CI/CD Docs](docs/CICD.md)
 
+## 🤝 Contributing
+
+Contributions are welcome! Please read our [Contributing Guidelines](.github/CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md) before submitting pull requests.
+
 Happy NixOS-ing! 🎉

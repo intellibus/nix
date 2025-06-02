@@ -2,6 +2,10 @@
 
 Thank you for your interest in contributing! 🎉 This document provides guidelines for contributing to this NixOS configuration project.
 
+## 📜 Code of Conduct
+
+This project and everyone participating in it is governed by our [Code of Conduct](../CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to the project maintainers.
+
 ## 🏗️ Development Setup
 
 ### 📋 Prerequisites
