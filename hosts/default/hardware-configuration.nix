@@ -30,6 +30,13 @@ in
   boot.kernelModules = lib.mkIf (!isCIBuild) [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 
+  # Kernel module stability improvements
+  # Prevent kernel module path issues after flake updates
+  boot.kernel.sysctl = lib.mkIf (!isCIBuild) {
+    # Improve kernel module loading stability
+    "kernel.modules_disabled" = 0;
+  };
+
   # Minimal safe filesystem configuration to prevent build errors in CI
   # IMPORTANT: Replace these with your actual filesystem configuration for real deployments
   fileSystems = lib.mkIf (!isCIBuild) {
