@@ -35,7 +35,7 @@
 
 ## 📁 Structure
 
-```
+```text
 ├── flake.nix                    # Main flake configuration
 ├── hosts/default/               # Host-specific configs
 └── modules/
@@ -46,6 +46,7 @@
 ## 🚀 Quick Start
 
 1. **Setup hardware config**:
+
    ```bash
    sudo nixos-generate-config
    sudo cp /etc/nixos/hardware-configuration.nix hosts/default/
@@ -54,6 +55,7 @@
 2. **Update personal info** in `flake.nix` and `modules/home-manager/git.nix`
 
 3. **Deploy**:
+
    ```bash
    sudo nixos-rebuild switch --flake .#nixos
    ```
@@ -92,6 +94,22 @@ sudo nix-collect-garbage -d
 **CI issues**: Test locally with `act -j check-flake`  
 **Rollback**: `sudo nixos-rebuild switch --rollback`  
 **Disk space in CI**: Large packages (TeXLive) auto-excluded via `NIXOS_CI_BUILD=true`
+
+### Common Issues
+
+**Package Collision**: If you get "collision between packages", check for duplicates:
+
+- Don't install packages via both `packages.nix` and `programs.*` configuration
+- Example: Remove `neovim` from packages if using `programs.neovim.enable = true`
+
+**Hardware Config**: Update `hosts/default/hardware-configuration.nix` with real values:
+
+```bash
+sudo nixos-generate-config --root /mnt
+# Copy generated hardware-configuration.nix to hosts/default/
+```
+
+**Path not in Nix store**: Usually caused by placeholder UUIDs in hardware config
 
 ## 📚 Resources
 
