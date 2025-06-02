@@ -221,8 +221,21 @@ in
     boot.initrd.availableKernelModules = lib.mkIf isCIBuild (lib.mkForce [ ]);
     boot.kernelModules = lib.mkIf isCIBuild (lib.mkForce [ ]);
     boot.extraModulePackages = lib.mkIf isCIBuild (lib.mkForce [ ]);
+
+    # Completely disable kernel module building in CI to prevent store path issues
+    boot.kernelPackages = lib.mkIf isCIBuild (lib.mkForce pkgs.linuxPackages_latest);
+    boot.kernel.sysctl = lib.mkIf isCIBuild (lib.mkForce { });
+
+    # Disable hardware-specific features that depend on kernel modules
     hardware.cpu.intel.updateMicrocode = lib.mkIf isCIBuild (lib.mkForce false);
     hardware.cpu.amd.updateMicrocode = lib.mkIf isCIBuild (lib.mkForce false);
+    hardware.enableRedistributableFirmware = lib.mkIf isCIBuild (lib.mkForce false);
+    hardware.firmware = lib.mkIf isCIBuild (lib.mkForce [ ]);
+
+    # Disable services that depend on hardware or kernel modules
+    services.udev.enable = lib.mkIf isCIBuild (lib.mkForce false);
+    services.udisks2.enable = lib.mkIf isCIBuild (lib.mkForce false);
+    powerManagement.enable = lib.mkIf isCIBuild (lib.mkForce false);
 
     # Enable the OpenSSH daemon
     services.openssh = {

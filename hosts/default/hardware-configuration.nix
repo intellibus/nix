@@ -31,14 +31,21 @@ in
     kernelModules = if isCIBuild then [ ] else [ "kvm-intel" ];
     extraModulePackages = [ ];
 
+    # Completely disable kernel module building in CI to prevent store path issues
+    kernelPackages = lib.mkIf isCIBuild (lib.mkForce pkgs.linuxPackages_latest);
+
     # Kernel module stability improvements - only in non-CI environments
-    kernel.sysctl = lib.mkIf (!isCIBuild) {
+    kernel.sysctl = if isCIBuild then { } else {
       "kernel.modules_disabled" = 0;
     };
 
     # Boot loader configuration - disabled in CI
     loader.systemd-boot.enable = !isCIBuild;
     loader.efi.canTouchEfiVariables = !isCIBuild;
+
+    # Prevent any kernel module evaluation in CI
+    initrd.systemd.enable = lib.mkIf isCIBuild (lib.mkForce false);
+    initrd.services = lib.mkIf isCIBuild (lib.mkForce { });
   };
 
   # Filesystem configuration - conditionally set based on CI environment  
