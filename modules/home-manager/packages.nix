@@ -1,5 +1,5 @@
 # Package configuration for home-manager
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   # The home.packages option allows you to install Nix packages into your
@@ -78,6 +78,11 @@
 
     # Document processing
     pandoc
-    texlive.combined.scheme-medium
+    
+    # Large packages - conditionally included based on environment
+    # Skip during CI builds to prevent out-of-disk-space errors
+    # Set NIXOS_CI_BUILD=true to exclude these packages
+  ] ++ lib.optionals (builtins.getEnv "NIXOS_CI_BUILD" != "true") [
+    texlive.combined.scheme-medium  # ~2GB LaTeX distribution
   ];
 }
