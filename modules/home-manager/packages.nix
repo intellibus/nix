@@ -56,7 +56,7 @@
     gnutar
 
     # Text editors and IDEs
-    neovim
+    # neovim - configured in development.nix via programs.neovim
     emacs
 
     # Media
@@ -78,11 +78,11 @@
 
     # Document processing
     pandoc
-    
+
     # Large packages - conditionally included based on environment
     # Skip during CI builds to prevent out-of-disk-space errors
     # Set NIXOS_CI_BUILD=true to exclude these packages
   ] ++ lib.optionals (builtins.getEnv "NIXOS_CI_BUILD" != "true") [
-    texlive.combined.scheme-medium  # ~2GB LaTeX distribution
+    texlive.combined.scheme-medium # ~2GB LaTeX distribution
   ];
 }
