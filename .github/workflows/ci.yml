@@ -77,15 +77,19 @@ jobs:
       - name: 🏗️ Build NixOS configuration
         env:
           NIXOS_CI_BUILD: "true" # Skip heavy packages during CI builds
+          NIX_CONFIG: |
+            extra-substituters = https://cache.nixos.org/
+            extra-trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
         run: |
           echo "Disk space before build:"
           df -h
 
-          # Build with optimizations for limited space
+          # Build with optimizations for limited space and CI environment
           nix build .#nixosConfigurations.${{ matrix.configuration }}.config.system.build.toplevel \
             --no-link --print-build-logs \
             --option max-jobs 1 \
-            --option cores 2
+            --option cores 2 \
+            --option sandbox false
             
           echo "Disk space after build:"
           df -h
@@ -140,15 +144,19 @@ jobs:
       - name: 🏠 Build Home Manager configuration
         env:
           NIXOS_CI_BUILD: "true" # Skip heavy packages during CI builds
+          NIX_CONFIG: |
+            extra-substituters = https://cache.nixos.org/
+            extra-trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
         run: |
           echo "Disk space before build:"
           df -h
 
-          # Build with optimizations for limited space
+          # Build with optimizations for limited space and CI environment
           nix build .#homeConfigurations."jager@nixos".activationPackage \
             --no-link --print-build-logs \
             --option max-jobs 1 \
-            --option cores 2
+            --option cores 2 \
+            --option sandbox false
             
           echo "Disk space after build:"
           df -h

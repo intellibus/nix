@@ -4,6 +4,10 @@
 
 { config, lib, pkgs, modulesPath, ... }:
 
+let
+  # Check if we're in a CI environment
+  isCIBuild = builtins.getEnv "NIXOS_CI_BUILD" == "true";
+in
 {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
@@ -18,32 +22,34 @@
   # 2. Run: sudo nixos-generate-config --root /mnt
   # 3. Copy /mnt/etc/nixos/hardware-configuration.nix to this file
   #
-  # For now, using minimal safe defaults that won't break the build
+  # For CI builds, use minimal safe defaults that won't break the build
 
-  # Example configuration - REPLACE WITH YOUR ACTUAL HARDWARE CONFIG
-  boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "usb_storage" "sd_mod" "rtsx_pci_sdmmc" ];
+  # Only include hardware-specific modules if not in CI environment
+  boot.initrd.availableKernelModules = lib.mkIf (!isCIBuild) [ "xhci_pci" "ahci" "usb_storage" "sd_mod" "rtsx_pci_sdmmc" ];
   boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-intel" ];
+  boot.kernelModules = lib.mkIf (!isCIBuild) [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 
-  # Minimal safe filesystem configuration to prevent build errors
-  # IMPORTANT: Replace these with your actual filesystem configuration
-  fileSystems."/" = {
-    device = "/dev/sda1"; # Update with your actual root device
-    fsType = "ext4";
+  # Minimal safe filesystem configuration to prevent build errors in CI
+  # IMPORTANT: Replace these with your actual filesystem configuration for real deployments
+  fileSystems = lib.mkIf (!isCIBuild) {
+    "/" = {
+      device = "/dev/sda1"; # Update with your actual root device
+      fsType = "ext4";
+    };
+
+    "/boot" = {
+      device = "/dev/sda2"; # Update with your actual boot device  
+      fsType = "vfat";
+      options = [ "fmask=0022" "dmask=0022" ];
+    };
   };
 
-  fileSystems."/boot" = {
-    device = "/dev/sda2"; # Update with your actual boot device  
-    fsType = "vfat";
-    options = [ "fmask=0022" "dmask=0022" ];
-  };
-
-  swapDevices = [ ];
+  swapDevices = lib.mkIf (!isCIBuild) [ ];
 
   # Enables DHCP on each ethernet and wireless interface.
-  networking.useDHCP = lib.mkDefault true;
+  networking.useDHCP = lib.mkDefault (!isCIBuild);
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-  hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+  hardware.cpu.intel.updateMicrocode = lib.mkDefault (config.hardware.enableRedistributableFirmware && !isCIBuild);
 }

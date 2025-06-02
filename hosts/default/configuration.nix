@@ -51,7 +51,8 @@
 
     # NVIDIA Graphics Configuration
     nvidia = {
-      enable = true; # Set to true to enable NVIDIA support
+      # Disable NVIDIA in CI environments to avoid kernel module issues
+      enable = !(builtins.getEnv "NIXOS_CI_BUILD" == "true");
       package = "stable"; # Options: "stable", "beta", "legacy_470", "legacy_390"
       opengl = true; # Enable OpenGL support
       modesetting = true; # Enable kernel modesetting (required for Wayland)
@@ -85,12 +86,13 @@
   };
 
   # Optional services (enable as needed)
+  # Some services are disabled in CI to avoid build issues and resource constraints
   optional-services = {
     docker.enable = false; # Enable Docker
-    virtualization.enable = false; # Enable KVM/QEMU
-    printing.enable = true; # Enable printing
-    bluetooth.enable = true; # Enable Bluetooth
-    steam.enable = false; # Enable Steam gaming
+    virtualization.enable = false; # Enable KVM/QEMU (disabled in CI)
+    printing.enable = !(builtins.getEnv "NIXOS_CI_BUILD" == "true"); # Enable printing (skip in CI)
+    bluetooth.enable = !(builtins.getEnv "NIXOS_CI_BUILD" == "true"); # Enable Bluetooth (skip in CI)
+    steam.enable = false; # Enable Steam gaming (heavy build, keep disabled by default)
     flatpak.enable = false; # Enable Flatpak
     zsh.enable = true; # Enable Zsh system-wide
   };

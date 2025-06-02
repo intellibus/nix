@@ -3,6 +3,8 @@
 
 let
   cfg = config.system-config;
+  # Check if we're in a CI environment
+  isCIBuild = builtins.getEnv "NIXOS_CI_BUILD" == "true";
 in
 {
   options.system-config = {
@@ -80,12 +82,12 @@ in
     # Hostname
     networking.hostName = cfg.hostname;
 
-    # Bootloader
-    boot.loader.systemd-boot.enable = true;
-    boot.loader.efi.canTouchEfiVariables = true;
+    # Bootloader (disabled in CI)
+    boot.loader.systemd-boot.enable = !isCIBuild;
+    boot.loader.efi.canTouchEfiVariables = !isCIBuild;
 
-    # Enable networking
-    networking.networkmanager.enable = true;
+    # Enable networking (disabled in CI)
+    networking.networkmanager.enable = !isCIBuild;
 
     # Set your time zone
     time.timeZone = cfg.timezone;
@@ -104,10 +106,10 @@ in
       LC_TIME = cfg.locale;
     };
 
-    # Enable sound with pipewire
+    # Enable sound with pipewire (skip in CI as it requires hardware)
     services.pulseaudio.enable = false;
-    security.rtkit.enable = true;
-    services.pipewire = {
+    security.rtkit.enable = !isCIBuild;
+    services.pipewire = lib.mkIf (!isCIBuild) {
       enable = true;
       alsa.enable = true;
       alsa.support32Bit = true;
@@ -115,9 +117,10 @@ in
     };
 
     # NVIDIA Graphics Configuration
-    services.xserver.videoDrivers = lib.mkIf cfg.nvidia.enable [ "nvidia" ];
+    # Only configure NVIDIA if enabled and not in CI environment
+    services.xserver.videoDrivers = lib.mkIf (cfg.nvidia.enable && !isCIBuild) [ "nvidia" ];
 
-    hardware.nvidia = lib.mkIf cfg.nvidia.enable {
+    hardware.nvidia = lib.mkIf (cfg.nvidia.enable && !isCIBuild) {
       # Enable modesetting (required for wayland)
       modesetting.enable = cfg.nvidia.modesetting;
 
@@ -160,19 +163,21 @@ in
       };
     };
 
-    # Enable OpenGL support
-    hardware.graphics = lib.mkIf (cfg.nvidia.enable && cfg.nvidia.opengl) {
+    # Enable OpenGL/Graphics support
+    # Different configurations for CI vs real hardware
+    hardware.graphics = {
       enable = true;
-      enable32Bit = true;
-      extraPackages = with pkgs; [
+      enable32Bit = !isCIBuild; # 32-bit support only on real hardware
+      extraPackages = lib.mkIf (cfg.nvidia.enable && cfg.nvidia.opengl && !isCIBuild) (with pkgs; [
         nvidia-vaapi-driver
         vaapiVdpau
         libvdpau-va-gl
-      ];
+      ]);
     };
 
     # NVIDIA Persistence Daemon (keeps GPU initialized)
-    systemd.services.nvidia-persistenced = lib.mkIf (cfg.nvidia.enable && cfg.nvidia.nvidiaPersistenced) {
+    # Only enable on real hardware, not in CI
+    systemd.services.nvidia-persistenced = lib.mkIf (cfg.nvidia.enable && cfg.nvidia.nvidiaPersistenced && !isCIBuild) {
       enable = true;
     };
 
@@ -189,7 +194,7 @@ in
       options = "--delete-older-than 1w";
     };
 
-    # System packages
+    # System packages - exclude hardware-dependent packages in CI
     environment.systemPackages = with pkgs; [
       vim
       wget
@@ -199,7 +204,22 @@ in
       tree
       unzip
       zip
+    ] ++ lib.optionals (!isCIBuild) [
+      # Hardware tools only available on real hardware
+      pciutils
+      usbutils
+      dmidecode
     ];
+
+    # CI Environment Overrides - Additional hardware-specific overrides
+    # Force empty configurations for hardware-dependent attributes in CI
+    fileSystems = lib.mkIf isCIBuild (lib.mkForce { });
+    swapDevices = lib.mkIf isCIBuild (lib.mkForce [ ]);
+    boot.initrd.availableKernelModules = lib.mkIf isCIBuild (lib.mkForce [ ]);
+    boot.kernelModules = lib.mkIf isCIBuild (lib.mkForce [ ]);
+    boot.extraModulePackages = lib.mkIf isCIBuild (lib.mkForce [ ]);
+    hardware.cpu.intel.updateMicrocode = lib.mkIf isCIBuild (lib.mkForce false);
+    hardware.cpu.amd.updateMicrocode = lib.mkIf isCIBuild (lib.mkForce false);
 
     # Enable the OpenSSH daemon
     services.openssh = {
