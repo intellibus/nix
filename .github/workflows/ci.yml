@@ -39,6 +39,27 @@ jobs:
       fail-fast: false
 
     steps:
+      - name: 🧹 Free up disk space
+        run: |
+          echo "Available disk space before cleanup:"
+          df -h
+
+          # Remove unnecessary packages and clean package cache
+          sudo apt-get clean
+          sudo apt-get autoremove -y
+
+          # Remove large unnecessary directories
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+
+          # Clear Docker if present
+          docker system prune -af || true
+
+          echo "Available disk space after cleanup:"
+          df -h
+
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
@@ -49,11 +70,31 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
             accept-flake-config = true
+            # Optimize for limited disk space
+            min-free = 1073741824  # 1GB minimum free space
+            max-free = 2147483648  # 2GB maximum free space
 
       - name: 🏗️ Build NixOS configuration
+        env:
+          NIXOS_CI_BUILD: "true" # Skip heavy packages during CI builds
         run: |
+          echo "Disk space before build:"
+          df -h
+
+          # Build with optimizations for limited space
           nix build .#nixosConfigurations.${{ matrix.configuration }}.config.system.build.toplevel \
-            --no-link --print-build-logs
+            --no-link --print-build-logs \
+            --option max-jobs 1 \
+            --option cores 2
+            
+          echo "Disk space after build:"
+          df -h
+
+          # Clean up after build to free space
+          nix-collect-garbage
+
+          echo "Disk space after cleanup:"
+          df -h
 
   check-home-manager:
     name: 🏠 Check Home Manager
@@ -61,6 +102,27 @@ jobs:
     needs: check-flake
 
     steps:
+      - name: 🧹 Free up disk space
+        run: |
+          echo "Available disk space before cleanup:"
+          df -h
+
+          # Remove unnecessary packages and clean package cache
+          sudo apt-get clean
+          sudo apt-get autoremove -y
+
+          # Remove large unnecessary directories
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+
+          # Clear Docker if present
+          docker system prune -af || true
+
+          echo "Available disk space after cleanup:"
+          df -h
+
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
@@ -71,11 +133,31 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
             accept-flake-config = true
+            # Optimize for limited disk space
+            min-free = 1073741824  # 1GB minimum free space
+            max-free = 2147483648  # 2GB maximum free space
 
       - name: 🏠 Build Home Manager configuration
+        env:
+          NIXOS_CI_BUILD: "true" # Skip heavy packages during CI builds
         run: |
+          echo "Disk space before build:"
+          df -h
+
+          # Build with optimizations for limited space
           nix build .#homeConfigurations."jager@nixos".activationPackage \
-            --no-link --print-build-logs
+            --no-link --print-build-logs \
+            --option max-jobs 1 \
+            --option cores 2
+            
+          echo "Disk space after build:"
+          df -h
+
+          # Clean up after build to free space
+          nix-collect-garbage
+
+          echo "Disk space after cleanup:"
+          df -h
 
   format-check:
     name: 📝 Format Check
@@ -115,7 +197,7 @@ jobs:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch full history for proper diff
+          fetch-depth: 0 # Fetch full history for proper diff
 
       - name: 🔍 Check for secrets (PR)
         if: github.event_name == 'pull_request'
