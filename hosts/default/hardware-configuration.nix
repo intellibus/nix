@@ -29,12 +29,12 @@
   # Minimal safe filesystem configuration to prevent build errors
   # IMPORTANT: Replace these with your actual filesystem configuration
   fileSystems."/" = {
-    device = "/dev/sda1";  # Update with your actual root device
+    device = "/dev/sda1"; # Update with your actual root device
     fsType = "ext4";
   };
 
   fileSystems."/boot" = {
-    device = "/dev/sda2";  # Update with your actual boot device  
+    device = "/dev/sda2"; # Update with your actual boot device  
     fsType = "vfat";
     options = [ "fmask=0022" "dmask=0022" ];
   };
