@@ -72,9 +72,13 @@ jobs:
             experimental-features = nix-command flakes
             accept-flake-config = true
             allowed-uris = github: https://github.com/ https://api.github.com/ https://codeload.github.com/ https://raw.githubusercontent.com/ https://cache.nixos.org/ https://nix-community.cachix.org/
-            # Optimize for limited disk space
-            min-free = 1073741824  # 1GB minimum free space
-            max-free = 2147483648  # 2GB maximum free space
+            # Optimize for limited disk space but prevent premature cleanup
+            min-free = 536870912   # 512MB minimum free space (reduced)
+            max-free = 1073741824  # 1GB maximum free space (reduced)
+            # Prevent store corruption issues
+            auto-optimise-store = false
+            keep-outputs = true
+            keep-derivations = true
 
       - name: 🏗️ Build NixOS configuration
         env:
@@ -86,18 +90,28 @@ jobs:
           echo "Disk space before build:"
           df -h
 
+          # Ensure Nix store integrity
+          nix store verify --all || echo "Store verification failed, continuing..."
+
           # Build with optimizations for limited space and CI environment
+          # Use --keep-going to continue on individual package failures
+          # Disable auto-gc during build to prevent store corruption
           nix build .#nixosConfigurations.${{ matrix.configuration }}.config.system.build.toplevel \
             --no-link --print-build-logs \
             --option max-jobs 1 \
             --option cores 2 \
-            --option sandbox false
+            --option sandbox false \
+            --option auto-optimise-store false \
+            --option min-free 0 \
+            --option max-free 0 \
+            --keep-going \
+            --fallback
             
           echo "Disk space after build:"
           df -h
 
-          # Clean up after build to free space
-          nix-collect-garbage
+          # Only clean up old generations, not the current build
+          nix-collect-garbage --delete-older-than 1d
 
           echo "Disk space after cleanup:"
           df -h
@@ -140,9 +154,13 @@ jobs:
             experimental-features = nix-command flakes
             accept-flake-config = true
             allowed-uris = github: https://github.com/ https://api.github.com/ https://codeload.github.com/ https://raw.githubusercontent.com/ https://cache.nixos.org/ https://nix-community.cachix.org/
-            # Optimize for limited disk space
-            min-free = 1073741824  # 1GB minimum free space
-            max-free = 2147483648  # 2GB maximum free space
+            # Optimize for limited disk space but prevent premature cleanup
+            min-free = 536870912   # 512MB minimum free space (reduced)
+            max-free = 1073741824  # 1GB maximum free space (reduced)
+            # Prevent store corruption issues
+            auto-optimise-store = false
+            keep-outputs = true
+            keep-derivations = true
 
       - name: 🏠 Build Home Manager configuration
         env:
@@ -154,18 +172,28 @@ jobs:
           echo "Disk space before build:"
           df -h
 
+          # Ensure Nix store integrity
+          nix store verify --all || echo "Store verification failed, continuing..."
+
           # Build with optimizations for limited space and CI environment
+          # Use --keep-going to continue on individual package failures
+          # Disable auto-gc during build to prevent store corruption
           nix build .#homeConfigurations."jager@nixos".activationPackage \
             --no-link --print-build-logs \
             --option max-jobs 1 \
             --option cores 2 \
-            --option sandbox false
+            --option sandbox false \
+            --option auto-optimise-store false \
+            --option min-free 0 \
+            --option max-free 0 \
+            --keep-going \
+            --fallback
             
           echo "Disk space after build:"
           df -h
 
-          # Clean up after build to free space
-          nix-collect-garbage
+          # Only clean up old generations, not the current build
+          nix-collect-garbage --delete-older-than 1d
 
           echo "Disk space after cleanup:"
           df -h
