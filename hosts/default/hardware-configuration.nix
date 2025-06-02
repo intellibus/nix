@@ -9,9 +9,9 @@ let
   isCIBuild = builtins.getEnv "NIXOS_CI_BUILD" == "true";
 in
 {
-  imports = [
-    (modulesPath + "/installer/scan/not-detected.nix")
-  ];
+  imports =
+    if isCIBuild then [ ]
+    else [ (modulesPath + "/installer/scan/not-detected.nix") ];
 
   # PLACEHOLDER: This is a template hardware configuration
   # You need to replace this with your actual hardware configuration
@@ -50,6 +50,7 @@ in
   # Enables DHCP on each ethernet and wireless interface.
   networking.useDHCP = lib.mkDefault (!isCIBuild);
 
-  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+  # Only set hostPlatform for non-CI builds to avoid Linux-specific kernel module evaluation
+  nixpkgs.hostPlatform = lib.mkIf (!isCIBuild) (lib.mkDefault "x86_64-linux");
   hardware.cpu.intel.updateMicrocode = lib.mkDefault (config.hardware.enableRedistributableFirmware && !isCIBuild);
 }
