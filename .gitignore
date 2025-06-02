@@ -1,0 +1,64 @@
+# Nix build outputs
+result
+result-*
+
+# Generated hardware configuration backup
+hardware-configuration.nix.bak
+
+# Lock file (you may want to commit this)
+# flake.lock
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# CI/CD artifacts
+coverage/
+reports/
+*.tar.gz
+*.zip
+
+# Secret files (security)
+secrets.nix
+secrets/
+*.age
+keys.txt
+
+# Development
+.direnv/
+.envrc
+
+# Home manager result links
+.hm-result
+
+# Backup files from setup script
+*.backup
+
+# Local test configurations
+test-config/
+local-test/
+
+# Project documentation files to ignore (from official repo)
+NVIDIA_DEPLOYMENT.md
+PROJECT_COMPLETE.md
+GETTING_STARTED.md
+QUICKREF.md

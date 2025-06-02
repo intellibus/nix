@@ -1,0 +1,133 @@
+name: 🔍 NixOS Configuration CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  check-flake:
+    name: 🧪 Check Flake
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ❄️ Install Nix
+        uses: cachix/install-nix-action@v26
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: 🔍 Check flake
+        run: nix flake check
+
+      - name: 📊 Show flake info
+        run: nix flake show
+
+  build-configurations:
+    name: 🏗️ Build Configurations
+    runs-on: ubuntu-latest
+    needs: check-flake
+    strategy:
+      matrix:
+        configuration: [nixos]
+      fail-fast: false
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ❄️ Install Nix
+        uses: cachix/install-nix-action@v26
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: 🏗️ Build NixOS configuration
+        run: |
+          nix build .#nixosConfigurations.${{ matrix.configuration }}.config.system.build.toplevel \
+            --no-link --print-build-logs
+
+  check-home-manager:
+    name: 🏠 Check Home Manager
+    runs-on: ubuntu-latest
+    needs: check-flake
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ❄️ Install Nix
+        uses: cachix/install-nix-action@v26
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: 🏠 Build Home Manager configuration
+        run: |
+          nix build .#homeConfigurations."jager@nixos".activationPackage \
+            --no-link --print-build-logs
+
+  format-check:
+    name: 📝 Format Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ❄️ Install Nix
+        uses: cachix/install-nix-action@v26
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: 📝 Check Nix formatting
+        run: |
+          nix run nixpkgs#nixpkgs-fmt -- --check .
+
+      - name: 💾 Check for uncommitted formatting changes
+        run: |
+          if ! git diff --exit-code; then
+            echo "❌ Files are not formatted properly"
+            echo "Run 'nix run nixpkgs#nixpkgs-fmt .' to fix formatting"
+            exit 1
+          else
+            echo "✅ All files are properly formatted"
+          fi
+
+  security-check:
+    name: 🔒 Security Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔍 Check for secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+          extra_args: --debug --only-verified
+
+      - name: 🔒 Check for hardcoded passwords
+        run: |
+          if grep -r "password.*=" . --include="*.nix" | grep -v "initialPassword\|hashedPassword"; then
+            echo "❌ Found potential hardcoded passwords"
+            exit 1
+          else
+            echo "✅ No hardcoded passwords found"
+          fi

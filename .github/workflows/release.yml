@@ -1,0 +1,99 @@
+name: 📦 Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  create-release:
+    name: 🎉 Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ❄️ Install Nix
+        uses: cachix/install-nix-action@v26
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: 🧪 Final validation
+        run: |
+          echo "🔍 Checking flake..."
+          nix flake check
+
+          echo "🏗️ Building configurations..."
+          nix build .#nixosConfigurations.nixos.config.system.build.toplevel --no-link
+
+          echo "🏠 Building home-manager..."
+          nix build .#homeConfigurations."jager@nixos".activationPackage --no-link
+
+      - name: 📋 Generate changelog
+        run: |
+          echo "# 🎉 NixOS Configuration Release $(git describe --tags --abbrev=0)" > CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "## 📦 What's Included" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "### 🖥️ System Configuration" >> CHANGELOG.md
+          echo "- NixOS system configuration with modular design" >> CHANGELOG.md
+          echo "- Desktop environment support (GNOME/KDE/XFCE)" >> CHANGELOG.md
+          echo "- Optional services (Docker, printing, Bluetooth, etc.)" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "### 🏠 Home Manager" >> CHANGELOG.md
+          echo "- User environment configuration" >> CHANGELOG.md
+          echo "- Development tools and editors" >> CHANGELOG.md
+          echo "- Shell configuration with Zsh and Starship" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "### 🔧 Tools" >> CHANGELOG.md
+          echo "- Interactive setup script" >> CHANGELOG.md
+          echo "- Makefile for common operations" >> CHANGELOG.md
+          echo "- Comprehensive documentation" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "## 🚀 Installation" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo '```bash' >> CHANGELOG.md
+          echo "# Download and extract" >> CHANGELOG.md
+          echo "wget https://github.com/YOUR_USERNAME/YOUR_REPO/archive/$(git describe --tags --abbrev=0).tar.gz" >> CHANGELOG.md
+          echo "tar -xzf $(git describe --tags --abbrev=0).tar.gz" >> CHANGELOG.md
+          echo "cd YOUR_REPO-$(git describe --tags --abbrev=0)" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "# Run setup" >> CHANGELOG.md
+          echo "./setup.sh" >> CHANGELOG.md
+          echo '```' >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "## 📝 Recent Changes" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          git log --oneline --pretty=format:"- %s" $(git describe --tags --abbrev=0 HEAD~1)..HEAD >> CHANGELOG.md
+
+      - name: 📦 Create tarball
+        run: |
+          tar -czf nixos-config-$(git describe --tags --abbrev=0).tar.gz \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='*.tar.gz' \
+            .
+
+      - name: 🎉 Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: CHANGELOG.md
+          files: |
+            nixos-config-*.tar.gz
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📢 Post-release notification
+        run: |
+          echo "🎉 Release created successfully!"
+          echo "📦 Tarball: nixos-config-$(git describe --tags --abbrev=0).tar.gz"
+          echo "🔗 Release URL: https://github.com/${{ github.repository }}/releases/tag/$(git describe --tags --abbrev=0)"

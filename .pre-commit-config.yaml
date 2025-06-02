@@ -1,0 +1,63 @@
+# 🎣 Pre-commit Configuration for NixOS Config
+# See https://pre-commit.com for more information
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+        name: 🧹 Remove trailing whitespace
+      - id: end-of-file-fixer
+        name: 📝 Fix end of files
+      - id: check-merge-conflict
+        name: 🔀 Check for merge conflicts
+      - id: check-added-large-files
+        name: 📦 Check for large files
+      - id: check-yaml
+        name: 📋 Check YAML syntax
+      - id: check-json
+        name: 🔧 Check JSON syntax
+
+  - repo: local
+    hooks:
+      - id: nix-fmt
+        name: ❄️ Format Nix files
+        entry: nix
+        args: [run, nixpkgs#nixpkgs-fmt, --]
+        language: system
+        files: \.nix$
+        pass_filenames: true
+
+      - id: flake-check
+        name: 🔍 Check Nix flake
+        entry: nix
+        args: [flake, check, --no-build]
+        language: system
+        files: \.(nix|lock)$
+        pass_filenames: false
+
+      - id: security-check
+        name: 🔒 Security check
+        entry: bash
+        args:
+          - -c
+          - |
+            if grep -r "password.*=" . --include="*.nix" | grep -v "initialPassword\|hashedPassword"; then
+              echo "❌ Found potential hardcoded passwords"
+              exit 1
+            fi
+        language: system
+        pass_filenames: false
+
+      - id: readme-check
+        name: 📚 Check documentation
+        entry: bash
+        args:
+          - -c
+          - |
+            if [ ! -s README.md ]; then
+              echo "❌ Missing or empty README.md"
+              exit 1
+            fi
+        language: system
+        pass_filenames: false

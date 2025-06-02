@@ -1,0 +1,77 @@
+name: 🤖 Bot Commands
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  bot-commands:
+    name: 🤖 Handle Bot Commands
+    runs-on: ubuntu-latest
+    if: github.event.issue.pull_request && contains(github.event.comment.body, '/bot')
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: ❄️ Install Nix
+        uses: cachix/install-nix-action@v26
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: 🤖 Process bot commands
+        run: |
+          COMMENT="${{ github.event.comment.body }}"
+
+          if echo "$COMMENT" | grep -q "/bot format"; then
+            echo "🤖 Formatting Nix files..."
+            nix run nixpkgs#nixpkgs-fmt -- .
+            
+            if ! git diff --exit-code; then
+              git config --local user.email "action@github.com"
+              git config --local user.name "GitHub Action Bot"
+              git add .
+              git commit -m "🤖 auto-format: apply nixpkgs-fmt"
+              git push
+              
+              gh pr comment ${{ github.event.issue.number }} --body "✅ Files have been formatted automatically!"
+            else
+              gh pr comment ${{ github.event.issue.number }} --body "✅ Files are already properly formatted!"
+            fi
+          fi
+
+          if echo "$COMMENT" | grep -q "/bot check"; then
+            echo "🤖 Running flake check..."
+            if nix flake check; then
+              gh pr comment ${{ github.event.issue.number }} --body "✅ Flake check passed!"
+            else
+              gh pr comment ${{ github.event.issue.number }} --body "❌ Flake check failed! Please review the configuration."
+            fi
+          fi
+
+          if echo "$COMMENT" | grep -q "/bot build"; then
+            echo "🤖 Building configuration..."
+            if nix build .#nixosConfigurations.nixos.config.system.build.toplevel --no-link; then
+              gh pr comment ${{ github.event.issue.number }} --body "✅ Configuration builds successfully!"
+            else
+              gh pr comment ${{ github.event.issue.number }} --body "❌ Configuration build failed! Please check the logs."
+            fi
+          fi
+
+          if echo "$COMMENT" | grep -q "/bot help"; then
+            gh pr comment ${{ github.event.issue.number }} --body "🤖 **Available bot commands:**
+            
+            - \`/bot format\` - 📝 Auto-format Nix files
+            - \`/bot check\` - 🔍 Run flake check
+            - \`/bot build\` - 🏗️ Build NixOS configuration
+            - \`/bot help\` - 📚 Show this help message
+            
+            Commands can be used in PR comments to trigger automated actions!"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

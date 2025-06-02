@@ -1,0 +1,81 @@
+name: 📋 Issue Templates
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  process-issue:
+    name: 📋 Process New Issue
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🏷️ Auto-label issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const labels = [];
+
+            // Auto-label based on title/content
+            if (issue.title.toLowerCase().includes('bug') || issue.body.toLowerCase().includes('error')) {
+              labels.push('🐛 bug');
+            }
+
+            if (issue.title.toLowerCase().includes('feature') || issue.title.toLowerCase().includes('enhancement')) {
+              labels.push('✨ enhancement');
+            }
+
+            if (issue.title.toLowerCase().includes('help') || issue.title.toLowerCase().includes('question')) {
+              labels.push('❓ question');
+            }
+
+            if (issue.title.toLowerCase().includes('documentation') || issue.title.toLowerCase().includes('docs')) {
+              labels.push('📚 documentation');
+            }
+
+            if (labels.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: labels
+              });
+            }
+
+      - name: 🤖 Welcome new contributors
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+
+            // Check if this is the user's first issue
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              creator: issue.user.login,
+              state: 'all'
+            });
+
+            if (issues.data.length === 1) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: "🎉 Welcome to the NixOS configuration project, @" + issue.user.login + "!\n\n" +
+                      "Thanks for your first issue! Here are some helpful resources:\n\n" +
+                      "📚 **Documentation:**\n" +
+                      "- [README.md](README.md) - Complete setup guide\n" +
+                      "- [docs/NVIDIA.md](docs/NVIDIA.md) - NVIDIA configuration guide\n\n" +
+                      "🚀 **Getting Started:**\n" +
+                      "1. Run the interactive setup: `./setup.sh`\n" +
+                      "2. Check the [troubleshooting section](README.md#-troubleshooting)\n" +
+                      "3. Join our community discussions\n\n" +
+                      "🤖 **Bot Commands:**\n" +
+                      "You can use these commands in comments:\n" +
+                      "- `/bot check` - Run flake validation\n" +
+                      "- `/bot format` - Auto-format code\n" +
+                      "- `/bot help` - Show all available commands\n\n" +
+                      "We'll review your issue soon! 🔍"
+              });
+            }
