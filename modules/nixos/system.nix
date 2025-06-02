@@ -134,13 +134,16 @@ in
       # Enable nvidia settings menu
       nvidiaSettings = true;
 
-      # Driver package selection
+      # Driver package selection - only evaluated when NVIDIA is enabled and not in CI
       package =
-        if cfg.nvidia.package == "stable" then config.boot.kernelPackages.nvidiaPackages.stable
-        else if cfg.nvidia.package == "beta" then config.boot.kernelPackages.nvidiaPackages.beta
-        else if cfg.nvidia.package == "legacy_470" then config.boot.kernelPackages.nvidiaPackages.legacy_470
-        else if cfg.nvidia.package == "legacy_390" then config.boot.kernelPackages.nvidiaPackages.legacy_390
-        else config.boot.kernelPackages.nvidiaPackages.stable;
+        let
+          kernelPackages = config.boot.kernelPackages;
+        in
+        if cfg.nvidia.package == "stable" then kernelPackages.nvidiaPackages.stable
+        else if cfg.nvidia.package == "beta" then kernelPackages.nvidiaPackages.beta
+        else if cfg.nvidia.package == "legacy_470" then kernelPackages.nvidiaPackages.legacy_470
+        else if cfg.nvidia.package == "legacy_390" then kernelPackages.nvidiaPackages.legacy_390
+        else kernelPackages.nvidiaPackages.stable;
 
       # NVIDIA Prime configuration for hybrid graphics
       prime = lib.mkIf cfg.nvidia.prime.enable {

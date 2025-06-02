@@ -89,7 +89,9 @@ jobs:
             --no-link --print-build-logs \
             --option max-jobs 1 \
             --option cores 2 \
-            --option sandbox false
+            --option sandbox false \
+            --option restrict-eval true \
+            --option allowed-uris "https://cache.nixos.org"
             
           echo "Disk space after build:"
           df -h
@@ -156,7 +158,8 @@ jobs:
             --no-link --print-build-logs \
             --option max-jobs 1 \
             --option cores 2 \
-            --option sandbox false
+            --option sandbox false \
+            --option restrict-eval true
             
           echo "Disk space after build:"
           df -h

@@ -24,22 +24,25 @@ in
   #
   # For CI builds, use minimal safe defaults that won't break the build
 
-  # Only include hardware-specific modules if not in CI environment
-  boot.initrd.availableKernelModules = lib.mkIf (!isCIBuild) [ "xhci_pci" "ahci" "usb_storage" "sd_mod" "rtsx_pci_sdmmc" ];
-  boot.initrd.kernelModules = [ ];
-  boot.kernelModules = lib.mkIf (!isCIBuild) [ "kvm-intel" ];
-  boot.extraModulePackages = [ ];
+  # Boot configuration - conditionally set based on CI environment
+  boot = {
+    initrd.availableKernelModules = if isCIBuild then [ ] else [ "xhci_pci" "ahci" "usb_storage" "sd_mod" "rtsx_pci_sdmmc" ];
+    initrd.kernelModules = [ ];
+    kernelModules = if isCIBuild then [ ] else [ "kvm-intel" ];
+    extraModulePackages = [ ];
 
-  # Kernel module stability improvements
-  # Prevent kernel module path issues after flake updates
-  boot.kernel.sysctl = lib.mkIf (!isCIBuild) {
-    # Improve kernel module loading stability
-    "kernel.modules_disabled" = 0;
+    # Kernel module stability improvements - only in non-CI environments
+    kernel.sysctl = lib.mkIf (!isCIBuild) {
+      "kernel.modules_disabled" = 0;
+    };
+
+    # Boot loader configuration - disabled in CI
+    loader.systemd-boot.enable = !isCIBuild;
+    loader.efi.canTouchEfiVariables = !isCIBuild;
   };
 
-  # Minimal safe filesystem configuration to prevent build errors in CI
-  # IMPORTANT: Replace these with your actual filesystem configuration for real deployments
-  fileSystems = lib.mkIf (!isCIBuild) {
+  # Filesystem configuration - conditionally set based on CI environment  
+  fileSystems = if isCIBuild then { } else {
     "/" = {
       device = "/dev/sda1"; # Update with your actual root device
       fsType = "ext4";
@@ -52,12 +55,11 @@ in
     };
   };
 
-  swapDevices = lib.mkIf (!isCIBuild) [ ];
+  swapDevices = if isCIBuild then [ ] else [ ];
 
   # Enables DHCP on each ethernet and wireless interface.
   networking.useDHCP = lib.mkDefault (!isCIBuild);
 
   # Only set hostPlatform for non-CI builds to avoid Linux-specific kernel module evaluation
   nixpkgs.hostPlatform = lib.mkIf (!isCIBuild) (lib.mkDefault "x86_64-linux");
-  hardware.cpu.intel.updateMicrocode = lib.mkDefault (config.hardware.enableRedistributableFirmware && !isCIBuild);
 }
