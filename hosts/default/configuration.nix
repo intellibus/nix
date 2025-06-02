@@ -52,7 +52,7 @@
     # NVIDIA Graphics Configuration
     nvidia = {
       enable = true; # Set to true to enable NVIDIA support
-      package = "beta"; # Options: "stable", "beta", "legacy_470", "legacy_390"
+      package = "stable"; # Options: "stable", "beta", "legacy_470", "legacy_390"
       opengl = true; # Enable OpenGL support
       modesetting = true; # Enable kernel modesetting (required for Wayland)
       nvidiaPersistenced = false; # Enable persistence daemon (optional)
