@@ -88,9 +88,10 @@ sudo nix-collect-garbage -d
 
 ## 🐛 Troubleshooting
 
-**Build fails**: Run `nix flake check --show-trace`
-**CI issues**: Test locally with `act -j check-flake`
-**Rollback**: `sudo nixos-rebuild switch --rollback`
+**Build fails**: Run `nix flake check --show-trace`  
+**CI issues**: Test locally with `act -j check-flake`  
+**Rollback**: `sudo nixos-rebuild switch --rollback`  
+**Disk space in CI**: Large packages (TeXLive) auto-excluded via `NIXOS_CI_BUILD=true`
 
 ## 📚 Resources
 

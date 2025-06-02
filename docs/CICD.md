@@ -167,6 +167,37 @@ Consider adding:
 - 👥 **Review requirements** for all changes
 - 🔐 **Limited repository permissions**
 
+## 💾 Disk Space Management
+
+### CI/CD Optimizations
+The CI pipeline includes several optimizations to handle GitHub Actions' limited disk space (~14GB):
+
+#### **Automatic Cleanup**
+- Removes unnecessary system packages before builds
+- Clears Docker cache and large tool directories
+- Runs `nix-collect-garbage` after each build step
+
+#### **Conditional Package Inclusion**
+Large packages like TeXLive are automatically excluded during CI builds:
+```nix
+# In modules/home-manager/packages.nix
+] ++ lib.optionals (builtins.getEnv "NIXOS_CI_BUILD" != "true") [
+  texlive.combined.scheme-medium  # ~2GB LaTeX distribution
+];
+```
+
+#### **Build Optimizations**
+- Limited parallel jobs (`max-jobs 1`, `cores 2`)
+- Nix store size limits (`min-free`/`max-free`)
+- Continuous disk space monitoring
+
+#### **Local Testing**
+To test with the same CI environment locally:
+```bash
+export NIXOS_CI_BUILD=true
+nix build .#homeConfigurations."jager@nixos".activationPackage
+```
+
 ## 🆘 Troubleshooting CI/CD
 
 ### Common Issues
