@@ -22,6 +22,7 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
             accept-flake-config = true
+            allowed-uris = github: https://github.com/ https://api.github.com/ https://codeload.github.com/ https://raw.githubusercontent.com/ https://cache.nixos.org/ https://nix-community.cachix.org/
 
       - name: 🔍 Check flake
         run: nix flake check
@@ -70,6 +71,7 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
             accept-flake-config = true
+            allowed-uris = github: https://github.com/ https://api.github.com/ https://codeload.github.com/ https://raw.githubusercontent.com/ https://cache.nixos.org/ https://nix-community.cachix.org/
             # Optimize for limited disk space
             min-free = 1073741824  # 1GB minimum free space
             max-free = 2147483648  # 2GB maximum free space
@@ -89,9 +91,7 @@ jobs:
             --no-link --print-build-logs \
             --option max-jobs 1 \
             --option cores 2 \
-            --option sandbox false \
-            --option restrict-eval true \
-            --option allowed-uris "https://cache.nixos.org"
+            --option sandbox false
             
           echo "Disk space after build:"
           df -h
@@ -139,6 +139,7 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
             accept-flake-config = true
+            allowed-uris = github: https://github.com/ https://api.github.com/ https://codeload.github.com/ https://raw.githubusercontent.com/ https://cache.nixos.org/ https://nix-community.cachix.org/
             # Optimize for limited disk space
             min-free = 1073741824  # 1GB minimum free space
             max-free = 2147483648  # 2GB maximum free space
@@ -158,8 +159,7 @@ jobs:
             --no-link --print-build-logs \
             --option max-jobs 1 \
             --option cores 2 \
-            --option sandbox false \
-            --option restrict-eval true
+            --option sandbox false
             
           echo "Disk space after build:"
           df -h
@@ -185,6 +185,7 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
             accept-flake-config = true
+            allowed-uris = github: https://github.com/ https://api.github.com/ https://codeload.github.com/ https://raw.githubusercontent.com/ https://cache.nixos.org/ https://nix-community.cachix.org/
 
       - name: 📝 Check Nix formatting
         run: |
