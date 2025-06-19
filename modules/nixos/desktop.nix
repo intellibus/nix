@@ -49,17 +49,14 @@ in
     environment.systemPackages = with pkgs; [
       # Basic desktop applications
       firefox
-      thunderbird
-      libreoffice
-      vlc
-      gimp
+      google-chrome
 
       # System utilities
       file-roller # archive manager
       gnome-disk-utility
 
       # Terminal and development
-      gnome-terminal
+      ghostty
       vscode
     ] ++ lib.optionals (cfg.desktop == "gnome") [
       # GNOME specific packages
