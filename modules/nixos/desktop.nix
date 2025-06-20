@@ -45,6 +45,13 @@ in
     # Install Firefox
     programs.firefox.enable = true;
 
+    programs.neovim = {
+      enable = true;
+      defaultEditor = true;
+    };
+
+    programs.fish.enable = true;
+
     # Common desktop packages
     environment.systemPackages = with pkgs; [
       # Basic desktop applications
