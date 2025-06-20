@@ -27,7 +27,7 @@ in
 
     # Hyprland specific configuration
     programs.hyprland.enable = lib.mkIf (cfg.desktop == "hyprland") true;
-    
+
     # Enable XDG Desktop Portal for Hyprland
     xdg.portal = lib.mkIf (cfg.desktop == "hyprland") {
       enable = true;

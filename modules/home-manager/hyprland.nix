@@ -13,17 +13,17 @@
       enable = true;
       # Use the package from NixOS module
       package = null;
-      
+
       # Hyprland configuration
       settings = {
         # Modifier key
         "$mod" = "SUPER";
-        
+
         # Monitor configuration (can be overridden per system)
         monitor = [
           ",preferred,auto,auto"
         ];
-        
+
         # Input configuration
         input = {
           kb_layout = "us";
@@ -33,7 +33,7 @@
           };
           sensitivity = 0; # -1.0 - 1.0, 0 means no modification
         };
-        
+
         # General configuration
         general = {
           gaps_in = 5;
@@ -44,7 +44,7 @@
           layout = "dwindle";
           allow_tearing = false;
         };
-        
+
         # Decoration
         decoration = {
           rounding = 10;
@@ -58,7 +58,7 @@
           shadow_render_power = 3;
           "col.shadow" = "rgba(1a1a1aee)";
         };
-        
+
         # Animations
         animations = {
           enabled = true;
@@ -72,28 +72,28 @@
             "workspaces, 1, 6, default"
           ];
         };
-        
+
         # Dwindle layout
         dwindle = {
           pseudotile = true;
           preserve_split = true;
         };
-        
+
         # Master layout
         master = {
           new_status = "master";
         };
-        
+
         # Gestures
         gestures = {
           workspace_swipe = false;
         };
-        
+
         # Misc settings
         misc = {
           force_default_wallpaper = -1;
         };
-        
+
         # Key bindings
         bind = [
           # Application shortcuts
@@ -106,55 +106,56 @@
           "$mod, P, pseudo," # dwindle
           "$mod, J, togglesplit," # dwindle
           "$mod, F, fullscreen,"
-          
+
           # Move focus with mod + arrow keys
           "$mod, left, movefocus, l"
           "$mod, right, movefocus, r"
           "$mod, up, movefocus, u"
           "$mod, down, movefocus, d"
-          
+
           # Move focus with mod + vim keys
           "$mod, h, movefocus, l"
           "$mod, l, movefocus, r"
           "$mod, k, movefocus, u"
           "$mod, j, movefocus, d"
-          
+
           # Move windows
           "$mod SHIFT, left, movewindow, l"
           "$mod SHIFT, right, movewindow, r"
           "$mod SHIFT, up, movewindow, u"
           "$mod SHIFT, down, movewindow, d"
-          
+
           # Move windows with vim keys
           "$mod SHIFT, h, movewindow, l"
           "$mod SHIFT, l, movewindow, r"
           "$mod SHIFT, k, movewindow, u"
           "$mod SHIFT, j, movewindow, d"
-          
+
           # Screenshot utilities
           ", Print, exec, grimblast copy area"
           "$mod, Print, exec, grimblast copy screen"
           "SHIFT, Print, exec, grimblast save area ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png"
-          
+
           # Audio controls
           ", XF86AudioRaiseVolume, exec, pamixer -i 5"
           ", XF86AudioLowerVolume, exec, pamixer -d 5"
           ", XF86AudioMute, exec, pamixer -t"
-          
+
           # Brightness controls
           ", XF86MonBrightnessUp, exec, brightnessctl set +5%"
           ", XF86MonBrightnessDown, exec, brightnessctl set 5%-"
-          
+
           # Media controls
           ", XF86AudioPlay, exec, playerctl play-pause"
           ", XF86AudioNext, exec, playerctl next"
           ", XF86AudioPrev, exec, playerctl previous"
-          
+
           # Lock screen
           "$mod, L, exec, hyprlock"
         ] ++ (
           # Workspaces - bind $mod + [shift +] {1..9} to [move to] workspace {1..9}
-          builtins.concatLists (builtins.genList (i:
+          builtins.concatLists (builtins.genList
+            (i:
               let ws = i + 1;
               in [
                 "$mod, code:1${toString i}, workspace, ${toString ws}"
@@ -163,13 +164,13 @@
             )
             9)
         );
-        
+
         # Mouse bindings
         bindm = [
           "$mod, mouse:272, movewindow"
           "$mod, mouse:273, resizewindow"
         ];
-        
+
         # Window rules
         windowrule = [
           "float, ^(pavucontrol)$"
@@ -177,7 +178,7 @@
           "float, ^(blueman-manager)$"
           "float, ^(gnome-calculator)$"
         ];
-        
+
         # Startup applications
         exec-once = [
           "waybar"
@@ -188,11 +189,11 @@
           "dbus-update-activation-environment --systemd --all"
         ];
       };
-      
+
       # Enable systemd integration
-      systemd.variables = ["--all"];
+      systemd.variables = [ "--all" ];
     };
-    
+
     # Configure additional Wayland applications
     programs.kitty = {
       enable = true;
@@ -203,7 +204,7 @@
         confirm_os_window_close = 0;
       };
     };
-    
+
     # Waybar configuration
     programs.waybar = {
       enable = true;
@@ -213,11 +214,11 @@
           position = "top";
           height = 30;
           spacing = 4;
-          
+
           modules-left = [ "hyprland/workspaces" "hyprland/mode" ];
           modules-center = [ "hyprland/window" ];
           modules-right = [ "pulseaudio" "network" "cpu" "memory" "temperature" "backlight" "battery" "clock" "tray" ];
-          
+
           "hyprland/workspaces" = {
             disable-scroll = true;
             all-outputs = true;
@@ -233,38 +234,38 @@
               default = "";
             };
           };
-          
+
           "hyprland/window" = {
             format = "{}";
             max-length = 50;
           };
-          
+
           clock = {
             timezone = "America/New_York";
             tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
             format-alt = "{:%Y-%m-%d}";
           };
-          
+
           cpu = {
             format = "{usage}% ";
             tooltip = false;
           };
-          
+
           memory = {
             format = "{}% ";
           };
-          
+
           temperature = {
             critical-threshold = 80;
             format = "{temperatureC}°C {icon}";
-            format-icons = ["" "" ""];
+            format-icons = [ "" "" "" ];
           };
-          
+
           backlight = {
             format = "{percent}% {icon}";
-            format-icons = ["" "" "" "" "" "" "" "" ""];
+            format-icons = [ "" "" "" "" "" "" "" "" "" ];
           };
-          
+
           battery = {
             states = {
               warning = 30;
@@ -274,9 +275,9 @@
             format-charging = "{capacity}% ";
             format-plugged = "{capacity}% ";
             format-alt = "{time} {icon}";
-            format-icons = ["" "" "" "" ""];
+            format-icons = [ "" "" "" "" "" ];
           };
-          
+
           network = {
             format-wifi = "{essid} ({signalStrength}%) ";
             format-ethernet = "{ipaddr}/{cidr} ";
@@ -285,7 +286,7 @@
             format-disconnected = "Disconnected ⚠";
             format-alt = "{ifname}: {ipaddr}/{cidr}";
           };
-          
+
           pulseaudio = {
             format = "{volume}% {icon} {format_source}";
             format-bluetooth = "{volume}% {icon} {format_source}";
@@ -300,13 +301,13 @@
               phone = "";
               portable = "";
               car = "";
-              default = ["" "" ""];
+              default = [ "" "" "" ];
             };
             on-click = "pavucontrol";
           };
         };
       };
-      
+
       style = ''
         * {
           border: none;
@@ -399,7 +400,7 @@
         }
       '';
     };
-    
+
     # Mako notification daemon
     services.mako = {
       enable = true;
@@ -411,7 +412,7 @@
       defaultTimeout = 5000;
       font = "Fira Code 12";
     };
-    
+
     # Configure cursor theme for Wayland
     home.pointerCursor = {
       gtk.enable = true;
@@ -420,7 +421,7 @@
       name = "Bibata-Modern-Classic";
       size = 16;
     };
-    
+
     # GTK theme configuration for Hyprland
     gtk = {
       enable = true;
@@ -449,7 +450,7 @@
         gtk-xft-rgba="rgb"
       '';
     };
-    
+
     # Hyprpaper wallpaper configuration
     services.hyprpaper = {
       enable = true;
@@ -464,7 +465,7 @@
         ipc = "on";
       };
     };
-    
+
     # Hypridle idle management
     services.hypridle = {
       enable = true;
@@ -497,7 +498,7 @@
         ];
       };
     };
-    
+
     # Hyprlock screen locker configuration
     programs.hyprlock = {
       enable = true;
@@ -532,7 +533,7 @@
         ];
       };
     };
-    
+
     # XDG settings for Wayland
     xdg.configFile."user-dirs.dirs".text = ''
       XDG_DESKTOP_DIR="$HOME/Desktop"
@@ -544,10 +545,10 @@
       XDG_PICTURES_DIR="$HOME/Pictures"
       XDG_VIDEOS_DIR="$HOME/Videos"
     '';
-    
+
     # Environment variables for Wayland applications
     home.sessionVariables = {
-      NIXOS_OZONE_WL = "1";  # Hint Electron apps to use Wayland
+      NIXOS_OZONE_WL = "1"; # Hint Electron apps to use Wayland
       XDG_CURRENT_DESKTOP = "Hyprland";
       XDG_SESSION_TYPE = "wayland";
       XDG_SESSION_DESKTOP = "Hyprland";
