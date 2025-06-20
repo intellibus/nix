@@ -50,7 +50,14 @@ in
       defaultEditor = true;
     };
 
-    programs.fish.enable = true;
+    programs.fish = {
+      enable = true;
+      interactiveShellInit = ''
+        if status is-interactive
+          oh-my-posh init fish | source
+        end
+      '';
+    };
 
     # Common desktop packages
     environment.systemPackages = with pkgs; [
@@ -66,6 +73,7 @@ in
       ghostty
       vscode
       code-cursor
+      oh-my-posh
     ] ++ lib.optionals (cfg.desktop == "gnome") [
       # GNOME specific packages
       gnome-tweaks
