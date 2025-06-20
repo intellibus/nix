@@ -58,6 +58,7 @@ in
       # Terminal and development
       ghostty
       vscode
+      code-cursor
     ] ++ lib.optionals (cfg.desktop == "gnome") [
       # GNOME specific packages
       gnome-tweaks
