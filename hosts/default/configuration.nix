@@ -94,7 +94,7 @@
     bluetooth.enable = !(builtins.getEnv "NIXOS_CI_BUILD" == "true"); # Enable Bluetooth (skip in CI)
     steam.enable = false; # Enable Steam gaming (heavy build, keep disabled by default)
     flatpak.enable = false; # Enable Flatpak
-    zsh.enable = true; # Enable Zsh system-wide
+    fish.enable = true; # Enable Fish system-wide
   };
 
   # This will be set to the release version of NixOS you're using

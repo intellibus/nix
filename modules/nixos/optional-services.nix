@@ -30,8 +30,8 @@ in
       enable = lib.mkEnableOption "Flatpak application sandboxing";
     };
 
-    zsh = {
-      enable = lib.mkEnableOption "Zsh as system shell";
+    fish = {
+      enable = lib.mkEnableOption "Fish as system shell";
     };
   };
 
@@ -115,16 +115,13 @@ in
       };
     })
 
-    # Zsh configuration
-    (lib.mkIf cfg.zsh.enable {
-      programs.zsh = {
+    # Fish configuration
+    (lib.mkIf cfg.fish.enable {
+      programs.fish = {
         enable = true;
-        enableCompletion = true;
-        autosuggestions.enable = true;
-        syntaxHighlighting.enable = true;
       };
-      users.defaultUserShell = pkgs.zsh;
-      environment.shells = with pkgs; [ zsh ];
+      users.defaultUserShell = pkgs.fish;
+      environment.shells = with pkgs; [ fish ];
     })
   ];
 }

@@ -2,12 +2,9 @@
 { config, pkgs, ... }:
 
 {
-  # Zsh configuration
-  programs.zsh = {
+  # Fish configuration
+  programs.fish = {
     enable = true;
-    enableCompletion = true;
-    autosuggestion.enable = true;
-    syntaxHighlighting.enable = true;
 
     shellAliases = {
       ll = "ls -l";
@@ -19,18 +16,19 @@
       ls = "eza";
       tree = "eza --tree";
     };
+  };
 
-    history = {
-      size = 10000;
-      path = "${config.xdg.dataHome}/zsh/history";
-    };
-
-    oh-my-zsh = {
-      enable = true;
-      plugins = [ "git" "sudo" "docker" "kubectl" ];
-      theme = "robbyrussell";
+  # Oh My Posh configuration
+  programs.oh-my-posh = {
+    enable = true;
+    settings = {
+      # You can set a preset theme here (for example: "paradox", "jandedobbeleer", etc.)
+      # or provide a custom theme JSON path:
+      theme = "paradox";
+      # theme = "/path/to/your/custom/theme.json";
     };
   };
+
 
   # Bash configuration (fallback)
   programs.bash = {
@@ -60,19 +58,19 @@
   # Direnv for automatic environment loading
   programs.direnv = {
     enable = true;
-    enableZshIntegration = true;
+    enableFishIntegration = true;
     nix-direnv.enable = true;
   };
 
   # Zoxide for smart directory jumping
   programs.zoxide = {
     enable = true;
-    enableZshIntegration = true;
+    enableFishIntegration = true;
   };
 
   # FZF for fuzzy finding
   programs.fzf = {
     enable = true;
-    enableZshIntegration = true;
+    enableFishIntegration = true;
   };
 }

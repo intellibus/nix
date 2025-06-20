@@ -21,7 +21,7 @@ in
     };
 
     shell = lib.mkOption {
-      default = pkgs.zsh;
+      default = pkgs.fish;
       description = "Default shell for the user";
       type = lib.types.package;
     };
