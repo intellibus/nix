@@ -79,6 +79,10 @@
               nixpkgs-review
               nix-update
 
+              # Environment management
+              direnv
+              nix-direnv
+
               # Git and development tools
               git
               pre-commit
