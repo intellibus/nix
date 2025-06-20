@@ -65,12 +65,14 @@ echo "Available desktop environments:"
 echo "1) GNOME (default)"
 echo "2) KDE Plasma"
 echo "3) XFCE"
-echo "4) None (headless)"
-read -p "Choose desktop environment (1-4, default: 1): " DESKTOP_CHOICE
+echo "4) Hyprland (Wayland)"
+echo "5) None (headless)"
+read -p "Choose desktop environment (1-5, default: 1): " DESKTOP_CHOICE
 case $DESKTOP_CHOICE in
     2) DESKTOP="kde" ;;
     3) DESKTOP="xfce" ;;
-    4) DESKTOP="none" ;;
+    4) DESKTOP="hyprland" ;;
+    5) DESKTOP="none" ;;
     *) DESKTOP="gnome" ;;
 esac
 
