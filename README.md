@@ -14,7 +14,7 @@
 - 🔄 **Auto-Updates** - Weekly dependency updates via PRs
 - 🛡️ **Security First** - Secret scanning & vulnerability checks
 - 📦 **Bot Commands** - Interactive PR management (`/bot help`)
-- 🎯 **Multi-Desktop** - GNOME, KDE, XFCE support
+- 🎯 **Multi-Desktop** - GNOME, KDE, XFCE, Hyprland support
 
 ## 🚦 Status
 
@@ -85,6 +85,9 @@ sudo nix-collect-garbage -d
 - **System packages**: Edit `modules/nixos/system.nix`
 - **User packages**: Edit `modules/home-manager/packages.nix`
 - **Desktop environment**: Change `desktop` option in `configuration.nix`
+  - Available options: `"gnome"`, `"kde"`, `"xfce"`, `"hyprland"`, `"none"`
+  - For Hyprland: Also set `hyprland-config.enable = true` in `home.nix`
+  - See `docs/HYPRLAND.md` for complete Hyprland setup guide
 
 ## 🐛 Troubleshooting
 
