@@ -58,19 +58,16 @@
   # Direnv for automatic environment loading
   programs.direnv = {
     enable = true;
-    enableFishIntegration = true;
     nix-direnv.enable = true;
   };
 
   # Zoxide for smart directory jumping
   programs.zoxide = {
     enable = true;
-    enableFishIntegration = true;
   };
 
   # FZF for fuzzy finding
   programs.fzf = {
     enable = true;
-    enableFishIntegration = true;
   };
 }
