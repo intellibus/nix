@@ -11,22 +11,37 @@ in
     desktop = lib.mkOption {
       default = "gnome";
       description = "Desktop environment to use";
-      type = lib.types.enum [ "gnome" "kde" "xfce" "none" ];
+      type = lib.types.enum [ "gnome" "kde" "xfce" "hyprland" "none" ];
     };
   };
 
   config = lib.mkIf cfg.enable {
-    # Enable the X11 windowing system
-    services.xserver.enable = true;
+    # Enable the X11 windowing system for traditional desktop environments
+    services.xserver.enable = lib.mkIf (cfg.desktop != "hyprland") true;
 
     # Configure keymap in X11
-    services.xserver.xkb = {
+    services.xserver.xkb = lib.mkIf (cfg.desktop != "hyprland") {
       layout = "us";
       variant = "";
     };
 
+    # Hyprland specific configuration
+    programs.hyprland.enable = lib.mkIf (cfg.desktop == "hyprland") true;
+    
+    # Enable XDG Desktop Portal for Hyprland
+    xdg.portal = lib.mkIf (cfg.desktop == "hyprland") {
+      enable = true;
+      extraPortals = with pkgs; [
+        xdg-desktop-portal-hyprland
+        xdg-desktop-portal-gtk
+      ];
+    };
+
     # Desktop environment specific configuration
-    services.displayManager.gdm.enable = lib.mkIf (cfg.desktop == "gnome") true;
+    services.displayManager.gdm = {
+      enable = lib.mkIf (cfg.desktop == "gnome" || cfg.desktop == "hyprland") true;
+      wayland = lib.mkIf (cfg.desktop == "hyprland") true;
+    };
     services.desktopManager.gnome.enable = lib.mkIf (cfg.desktop == "gnome") true;
 
     services.displayManager.sddm.enable = lib.mkIf (cfg.desktop == "kde") true;
@@ -70,6 +85,25 @@ in
       kdePackages.kate
       kdePackages.kcalc
       kdePackages.gwenview
+    ] ++ lib.optionals (cfg.desktop == "hyprland") [
+      # Hyprland specific packages
+      kitty # Required for default Hyprland config
+      wofi # App launcher
+      waybar # Status bar
+      mako # Notification daemon
+      swww # Wallpaper daemon
+      grimblast # Screenshot tool
+      slurp # Screen area selection
+      wl-clipboard # Clipboard utilities
+      brightnessctl # Brightness control
+      pamixer # Audio control
+      playerctl # Media control
+      hyprpaper # Wallpaper utility
+      hyprlock # Screen locker
+      hypridle # Idle management
+      hyprpicker # Color picker
+      xdg-desktop-portal-hyprland
+      polkit-kde-agent # Authentication agent
     ];
 
     # Fonts

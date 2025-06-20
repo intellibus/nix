@@ -9,6 +9,7 @@
     ../../modules/home-manager/shell.nix
     ../../modules/home-manager/git.nix
     ../../modules/home-manager/development.nix
+    ../../modules/home-manager/hyprland.nix
   ];
 
   nixpkgs = {
@@ -39,6 +40,9 @@
   # Add stuff for your user as you see fit:
   # programs.neovim.enable = true;
   # home.packages = with pkgs; [ steam ];
+
+  # Enable Hyprland configuration (set to true when using Hyprland)
+  hyprland-config.enable = false; # Set to true when desktop = "hyprland"
 
   # Enable home-manager and git
   programs.home-manager.enable = true;

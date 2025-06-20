@@ -79,6 +79,18 @@
     # Document processing
     pandoc
     
+    # Hyprland/Wayland specific utilities (conditional)
+    wofi # App launcher for Wayland
+    waybar # Status bar for Wayland
+    mako # Notification daemon for Wayland
+    swww # Wallpaper daemon for Wayland
+    grimblast # Screenshot tool for Wayland
+    slurp # Screen area selection for Wayland
+    wl-clipboard # Clipboard utilities for Wayland
+    grim # Another screenshot tool for Wayland
+    wf-recorder # Screen recording for Wayland
+    kanshi # Display configuration for Wayland
+    
     # Large packages - conditionally included based on environment
     # Skip during CI builds to prevent out-of-disk-space errors
     # Set NIXOS_CI_BUILD=true to exclude these packages

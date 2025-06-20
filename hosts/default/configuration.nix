@@ -81,7 +81,7 @@
 
   desktop-environment = {
     enable = true;
-    desktop = "gnome"; # Options: "gnome", "kde", "xfce", "none"
+    desktop = "gnome"; # Options: "gnome", "kde", "xfce", "hyprland", "none"
   };
 
   # Optional services (enable as needed)
