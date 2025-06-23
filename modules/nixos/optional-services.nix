@@ -66,7 +66,6 @@ in
           gutenprint
           hplip
           epson-escpr
-          cnijfilter2
         ];
       };
       services.avahi = {
