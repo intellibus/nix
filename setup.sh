@@ -140,14 +140,14 @@ sudo cp -r "$SCRIPT_DIR"/* /etc/nixos/
 sudo chown -R root:root /etc/nixos
 
 # Enable flakes if not already enabled
-print_info "Ensuring flakes are enabled..."
-sudo mkdir -p /etc/nix
-if ! grep -q "experimental-features.*flakes" /etc/nix/nix.conf 2>/dev/null; then
-    echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.conf
-    print_success "Flakes enabled"
-else
-    print_info "Flakes already enabled"
-fi
+#print_info "Ensuring flakes are enabled..."
+#sudo mkdir -p /etc/nix
+#if ! grep -q "experimental-features.*flakes" /etc/nix/nix.conf 2>/dev/null; then
+#    echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.conf
+#    print_success "Flakes enabled"
+#else
+#    print_info "Flakes already enabled"
+#fi
 
 print_success "Configuration setup complete!"
 print_info ""
