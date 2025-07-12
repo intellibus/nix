@@ -67,11 +67,21 @@ in
 
     programs.fish = {
       enable = true;
-      interactiveShellInit = ''
-        if status is-interactive
-          oh-my-posh init fish | source
-        end
-      '';
+      interactiveShellInit = lib.mkMerge [
+        (lib.mkIf (cfg.desktop == "hyprland") ''
+          set -gx XDG_CURRENT_DESKTOP=Hyprland
+          set -gx XDG_SESSION_TYPE=wayland
+          set -gx GDK_BACKEND=wayland,x11
+          set -gx QT_QPA_PLATFORM=wayland;xcb
+          set -gx SDL_VIDEODRIVER=wayland
+          set -gx CLUTTER_BACKEND=wayland
+        '')
+        ''
+          if status is-interactive
+            oh-my-posh init fish | source
+          end
+        ''
+      ];
     };
 
     # Common desktop packages
