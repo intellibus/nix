@@ -116,7 +116,7 @@ in
       hypridle # Idle management
       hyprpicker # Color picker
       xdg-desktop-portal-hyprland
-      polkit-kde-agent # Authentication agent
+      kdePackages.polkit-kde-agent-1 # Authentication agent
     ];
 
     # Fonts
