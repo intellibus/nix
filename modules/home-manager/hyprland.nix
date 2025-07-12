@@ -168,12 +168,13 @@
         ];
 
         # Window rules
-        windowrule = [
-          "float, ^(pavucontrol)$"
-          "float, ^(nm-applet)$"
-          "float, ^(blueman-manager)$"
-          "float, ^(gnome-calculator)$"
+        windowrulev2 = [
+          "float,class:^(pavucontrol)$"
+          "float,class:^(nm-applet)$"
+          "float,class:^(blueman-manager)$"
+          "float,class:^(gnome-calculator)$"
         ];
+
 
         # Startup applications
         exec-once = [
