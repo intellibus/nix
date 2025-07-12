@@ -42,7 +42,7 @@
   # home.packages = with pkgs; [ steam ];
 
   # Enable Hyprland configuration (set to true when using Hyprland)
-  hyprland-config.enable = false; # Set to true when desktop = "hyprland"
+  hyprland-config.enable = true; # set to true when desktop = "hyprland"
 
   # Enable home-manager and git
   programs.home-manager.enable = true;
