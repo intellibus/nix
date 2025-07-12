@@ -69,12 +69,12 @@ in
       enable = true;
       interactiveShellInit = lib.mkMerge [
         (lib.mkIf (cfg.desktop == "hyprland") ''
-          set -gx XDG_CURRENT_DESKTOP=Hyprland
-          set -gx XDG_SESSION_TYPE=wayland
-          set -gx GDK_BACKEND=wayland,x11
-          set -gx QT_QPA_PLATFORM=wayland;xcb
-          set -gx SDL_VIDEODRIVER=wayland
-          set -gx CLUTTER_BACKEND=wayland
+          export XDG_CURRENT_DESKTOP=Hyprland
+          export XDG_SESSION_TYPE=wayland
+          export GDK_BACKEND=wayland,x11
+          export QT_QPA_PLATFORM=wayland;xcb
+          export SDL_VIDEODRIVER=wayland
+          export CLUTTER_BACKEND=wayland
         '')
         ''
           if status is-interactive
