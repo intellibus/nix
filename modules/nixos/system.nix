@@ -222,9 +222,9 @@ in
     boot.kernelModules = lib.mkIf isCIBuild (lib.mkForce [ ]);
     boot.extraModulePackages = lib.mkIf isCIBuild (lib.mkForce [ ]);
 
-    # Completely disable kernel module building in CI to prevent store path issues
-    boot.kernelPackages = lib.mkIf isCIBuild (lib.mkForce pkgs.linuxPackages_latest);
-    boot.kernel.sysctl = lib.mkIf isCIBuild (lib.mkForce { });
+  # Avoid forcing a different kernel in CI; doing so can reference module paths
+  # that aren't realized. Empty module lists are sufficient. Only clear sysctl.
+  boot.kernel.sysctl = lib.mkIf isCIBuild (lib.mkForce { });
 
     # Disable hardware-specific features that depend on kernel modules
     hardware.cpu.intel.updateMicrocode = lib.mkIf isCIBuild (lib.mkForce false);

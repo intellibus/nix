@@ -8,7 +8,11 @@ lib.mkIf isCIBuild {
   boot.initrd.availableKernelModules = lib.mkForce [ ];
   boot.kernelModules = lib.mkForce [ ];
   boot.extraModulePackages = lib.mkForce [ ];
-  boot.kernelPackages = lib.mkForce null;
+  # NOTE: Do NOT force boot.kernelPackages to null; doing so breaks kernel
+  # derivation assumptions (e.g. modules-shrunk path) and leads to
+  # 'path ...-linux-*-modules-shrunk/lib is not in the Nix store' errors in CI.
+  # We leave the default kernelPackages in place; empty module lists already
+  # avoid building extra drivers. We still clear sysctl to avoid host-specific tuning.
   boot.kernel.sysctl = lib.mkForce { };
 
   hardware.cpu.intel.updateMicrocode = lib.mkForce false;
