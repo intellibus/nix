@@ -8,11 +8,13 @@
     ./hardware-configuration.nix
 
     # Import our custom modules
-    ../../modules/nixos/main-user.nix
     ../../modules/nixos/system.nix
+    ../../modules/nixos/main-user.nix
     ../../modules/nixos/desktop.nix
     ../../modules/nixos/optional-services.nix
-  ];
+  ] ++ (if builtins.getEnv "NIXOS_CI_BUILD" == "true" then [
+    ../../modules/nixos/ci-overrides.nix
+  ] else []);
 
   nixpkgs = {
     # You can add overlays here
