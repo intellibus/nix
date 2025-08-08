@@ -9,7 +9,15 @@ on:
 jobs:
   create-release:
     name: 🎉 Create Release
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - config: nixos-x86_64
+            runs-on: ubuntu-24.04      # Native x86_64 runner
+          - config: nixos-aarch64
+            runs-on: ubuntu-24.04-arm64  # Native ARM64 runner
+    runs-on: ${{ matrix.runs-on }}
 
     steps:
       - name: 📥 Checkout repository
@@ -25,68 +33,32 @@ jobs:
             experimental-features = nix-command flakes
             accept-flake-config = true
 
-      - name: 🧪 Final validation
+      - name: 🧪 Final validation and build
         run: |
           echo "🔍 Checking flake..."
+          nix flake show
           nix flake check
 
-          echo "🏗️ Building configurations..."
-          nix build .#nixosConfigurations.nixos.config.system.build.toplevel --no-link
+          echo "🏗️ Building NixOS (${{ matrix.config }})..."
+          nix build .#nixosConfigurations.${{ matrix.config }}.config.system.build.toplevel --no-link -L
 
-          echo "🏠 Building home-manager..."
-          nix build .#homeConfigurations."jager@nixos".activationPackage --no-link
-
-      - name: 📋 Generate changelog
-        run: |
-          echo "# 🎉 NixOS Configuration Release $(git describe --tags --abbrev=0)" > CHANGELOG.md
-          echo "" >> CHANGELOG.md
-          echo "## 📦 What's Included" >> CHANGELOG.md
-          echo "" >> CHANGELOG.md
-          echo "### 🖥️ System Configuration" >> CHANGELOG.md
-          echo "- NixOS system configuration with modular design" >> CHANGELOG.md
-          echo "- Desktop environment support (GNOME/KDE/XFCE)" >> CHANGELOG.md
-          echo "- Optional services (Docker, printing, Bluetooth, etc.)" >> CHANGELOG.md
-          echo "" >> CHANGELOG.md
-          echo "### 🏠 Home Manager" >> CHANGELOG.md
-          echo "- User environment configuration" >> CHANGELOG.md
-          echo "- Development tools and editors" >> CHANGELOG.md
-          echo "- Shell configuration with Zsh and Starship" >> CHANGELOG.md
-          echo "" >> CHANGELOG.md
-          echo "### 🔧 Tools" >> CHANGELOG.md
-          echo "- Interactive setup script" >> CHANGELOG.md
-          echo "- Makefile for common operations" >> CHANGELOG.md
-          echo "- Comprehensive documentation" >> CHANGELOG.md
-          echo "" >> CHANGELOG.md
-          echo "## 🚀 Installation" >> CHANGELOG.md
-          echo "" >> CHANGELOG.md
-          echo '```bash' >> CHANGELOG.md
-          echo "# Download and extract" >> CHANGELOG.md
-          echo "wget https://github.com/YOUR_USERNAME/YOUR_REPO/archive/$(git describe --tags --abbrev=0).tar.gz" >> CHANGELOG.md
-          echo "tar -xzf $(git describe --tags --abbrev=0).tar.gz" >> CHANGELOG.md
-          echo "cd YOUR_REPO-$(git describe --tags --abbrev=0)" >> CHANGELOG.md
-          echo "" >> CHANGELOG.md
-          echo "# Run setup" >> CHANGELOG.md
-          echo "./setup.sh" >> CHANGELOG.md
-          echo '```' >> CHANGELOG.md
-          echo "" >> CHANGELOG.md
-          echo "## 📝 Recent Changes" >> CHANGELOG.md
-          echo "" >> CHANGELOG.md
-          git log --oneline --pretty=format:"- %s" $(git describe --tags --abbrev=0 HEAD~1)..HEAD >> CHANGELOG.md
+          echo "🏠 Building Home Manager (${{ matrix.config }})..."
+          nix build .#homeConfigurations."absurdprofit@${{ matrix.config }}".activationPackage --no-link -L
 
       - name: 📦 Create tarball
         run: |
-          tar -czf nixos-config-$(git describe --tags --abbrev=0).tar.gz \
+          TAR="nixos-config-$(git describe --tags --abbrev=0)-${{ matrix.config }}.tar.gz"
+          tar -czf "$TAR" \
             --exclude='.git' \
             --exclude='.github' \
             --exclude='*.tar.gz' \
             .
+          echo "TAR=$TAR" >> $GITHUB_ENV
 
       - name: 🎉 Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
-          body_path: CHANGELOG.md
-          files: |
-            nixos-config-*.tar.gz
+          files: ${{ env.TAR }}
           draft: false
           prerelease: false
         env:
@@ -94,6 +66,4 @@ jobs:
 
       - name: 📢 Post-release notification
         run: |
-          echo "🎉 Release created successfully!"
-          echo "📦 Tarball: nixos-config-$(git describe --tags --abbrev=0).tar.gz"
-          echo "🔗 Release URL: https://github.com/${{ github.repository }}/releases/tag/$(git describe --tags --abbrev=0)"
+          echo "🎉 Release created successfully for ${{ matrix.config }}!"

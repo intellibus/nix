@@ -2,48 +2,19 @@
 # Use this to configure your system environment (it replaces /etc/nixos/configuration.nix)
 
 { inputs, outputs, lib, config, pkgs, ... }: {
-  # You can import other NixOS modules here
-  imports =
-    [
-      # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-
-      # Import our custom modules
-      ../../modules/nixos/system.nix
-      ../../modules/nixos/main-user.nix
-      ../../modules/nixos/desktop.nix
-      ../../modules/nixos/optional-services.nix
-    ]
-    ++ (if builtins.getEnv "NIXOS_CI_BUILD" == "true" then
-      [ ../../modules/nixos/ci-overrides.nix ]
-    else []);
+  # GitHub Actions runner host
+  imports = [
+    ./hardware-configuration.nix
+    ../../modules/nixos/ci-overrides.nix
+  ];
 
   nixpkgs = {
-    # You can add overlays here
-    overlays = [
-      # Add overlays your own flake exports (from overlays and pkgs dir):
-      # outputs.overlays.additions
-      # outputs.overlays.modifications
-      # outputs.overlays.unstable-packages
-
-      # You can also add overlays exported from other flakes:
-      # neovim-nightly-overlay.overlays.default
-
-      # Or define it inline, for example:
-      # (final: prev: {
-      #   hi = final.hello.overrideAttrs (oldAttrs: {
-      #     patches = [ ./change-hello-to-hi.patch ];
-      #   });
-      # })
-    ];
-    # Configure your nixpkgs instance
+    overlays = [ ];
     config = {
-      # Disable if you don't want unfree packages
       allowUnfree = true;
     };
   };
 
-  # Enable our custom modules
   main-user = {
     enable = true;
     userName = "absurdprofit";
@@ -53,54 +24,41 @@
     enable = true;
     hostname = "nixos";
 
-    # NVIDIA Graphics Configuration
+    # NVIDIA Graphics Configuration (always off in CI)
     nvidia = {
-      # Disable NVIDIA in CI environments to avoid kernel module issues
-      enable = !(builtins.getEnv "NIXOS_CI_BUILD" == "true");
-      package = "stable"; # Options: "stable", "beta", "legacy_470", "legacy_390"
-      opengl = true; # Enable OpenGL support
-      modesetting = true; # Enable kernel modesetting (required for Wayland)
-      nvidiaPersistenced = false; # Enable persistence daemon (optional)
-
-      # Power management (experimental features)
+      enable = false;
+      package = "stable";
+      opengl = false;
+      modesetting = false;
+      nvidiaPersistenced = false;
       powerManagement = {
-        enable = false; # Enable power management
-        finegrained = false; # Fine-grained power management (very experimental)
+        enable = false;
+        finegrained = false;
       };
-
-      # NVIDIA Prime for hybrid graphics (laptops with Intel + NVIDIA)
       prime = {
-        enable = false; # Set to true if you have hybrid graphics
-        mode = "sync"; # Options: "sync", "offload", "reverse-sync"
-
-        # Find your GPU bus IDs with: lspci | grep -E "VGA|3D"
-        # Example outputs:
-        # 00:02.0 VGA compatible controller: Intel Corporation Device
-        # 01:00.0 3D controller: NVIDIA Corporation Device
-        nvidiaBusId = ""; # Example: "PCI:1:0:0"  
-        intelBusId = ""; # Example: "PCI:0:2:0"
-        amdgpuBusId = ""; # Example: "PCI:6:0:0" (for AMD + NVIDIA)
+        enable = false;
+        mode = "sync";
+        nvidiaBusId = "";
+        intelBusId = "";
+        amdgpuBusId = "";
       };
     };
   };
 
   desktop-environment = {
     enable = true;
-    desktop = "hyprland"; # Options: "gnome", "kde", "xfce", "hyprland", "none"
   };
 
-  # Optional services (enable as needed)
-  # Some services are disabled in CI to avoid build issues and resource constraints
+  # Optional services (keep disabled for CI)
   optional-services = {
-    docker.enable = false; # Enable Docker
-    virtualization.enable = false; # Enable KVM/QEMU (disabled in CI)
-    printing.enable = !(builtins.getEnv "NIXOS_CI_BUILD" == "true"); # Enable printing (skip in CI)
-    bluetooth.enable = !(builtins.getEnv "NIXOS_CI_BUILD" == "true"); # Enable Bluetooth (skip in CI)
-    steam.enable = false; # Enable Steam gaming (heavy build, keep disabled by default)
-    flatpak.enable = false; # Enable Flatpak
-    fish.enable = true; # Enable Fish system-wide
+    docker.enable = false;
+    virtualization.enable = false;
+    printing.enable = false;
+    bluetooth.enable = false;
+    steam.enable = false;
+    flatpak.enable = false;
+    fish.enable = true;
   };
 
-  # This will be set to the release version of NixOS you're using
   system.stateVersion = "24.05";
 }

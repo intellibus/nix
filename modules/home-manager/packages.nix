@@ -94,7 +94,8 @@
     # Large packages - conditionally included based on environment
     # Skip during CI builds to prevent out-of-disk-space errors
     # Set NIXOS_CI_BUILD=true to exclude these packages
-  ] ++ lib.optionals (builtins.getEnv "NIXOS_CI_BUILD" != "true") [
-    texlive.combined.scheme-medium # ~2GB LaTeX distribution
+  ] ++ lib.optionals (!config.ciMode) [
+    # Only include heavy packages when not in CI
+    texlive.combined.scheme-medium
   ];
 }

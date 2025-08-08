@@ -1,11 +1,7 @@
 { lib, ... }:
 
-let
-  isCIBuild = builtins.getEnv "NIXOS_CI_BUILD" == "true";
-in
-lib.mkIf isCIBuild {
-  # CI overrides: keep kernel module discovery intact to avoid missing
-  # linux-*modules-shrunk paths. Only disable hardware-dependent extras.
+{
+  # CI overrides always applied for this host (no env var detection)
 
   boot.kernel.sysctl = lib.mkForce { };
 
